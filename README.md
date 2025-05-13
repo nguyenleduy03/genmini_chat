@@ -1,6 +1,7 @@
 # 💬 Chipi Chipi - Honey Farm Virtual Assistant
 
 **Chipi Chipi** is a simple web-based chatbot that acts as a **customer service assistant** for a **honey farm**. It uses a Facebook Messenger-style interface and connects to the **Google Gemini API** to generate AI-powered responses. The assistant has a set personality and responds naturally to user questions about products or contact information.
+![Alt text](https://github.com/nguyenleduy03/genmini_chat/blob/main/index.html)
 
 ## 🚀 Features
 

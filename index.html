@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Trò chuyện với Chipi Chipi - Trợ lý mật ong</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+    }
+    .chat-container {
+      width: 400px;
+      height: 600px;
+      background-color: white;
+      border-radius: 10px;
+      margin: 50px auto;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #ddd;
+    }
+    .chat-header {
+      background-color: #ffbb33;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+      font-weight: bold;
+    }
+    .chat-history {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      border-bottom: 1px solid #ddd;
+    }
+    .chat-message {
+      display: flex;
+      margin-bottom: 10px;
+    }
+    .chat-message p {
+      max-width: 70%;
+      padding: 10px;
+      border-radius: 10px;
+      margin: 0;
+      line-height: 1.4;
+    }
+    .chat-message.user p {
+      background-color: #d1f7d1;
+      margin-left: auto;
+    }
+    .chat-message.bot p {
+      background-color: #f1f1f1;
+    }
+    .chat-input {
+      display: flex;
+      padding: 10px;
+    }
+    .chat-input textarea {
+      width: 80%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      resize: none;
+      height: 50px;
+    }
+    .chat-input button {
+      padding: 10px;
+      margin-left: 10px;
+      border: none;
+      background-color: #ffbb33;
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .chat-input button:hover {
+      background-color: #ffaa00;
+    }
+  </style>
+</head>
+<body>
+
+<div class="chat-container">
+  <div class="chat-header">
+    Chipi Chipi - Tư vấn mật ong
+  </div>
+  <div id="chat-history" class="chat-history"></div>
+  <div class="chat-input">
+    <textarea id="prompt" placeholder="Nhập câu hỏi của bạn..."></textarea>
+    <button onclick="sendMessage()">Gửi</button>
+  </div>
+</div>
+
+<script>
+  const API_KEY = "AIzaSyBF1HkrExLz9FEz57UUoFqWSmvOEEkWwos";
+  const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+
+  const historyEl = document.getElementById("chat-history");
+
+  // Lời chào và vai trò
+  window.onload = () => {
+    appendMessage("Xin chào! Mình là <b>chipi chipi</b> - Nhân viên tư vấn của trang trại mật ong. Mình có thể giúp bạn về sản phẩm, liên hệ, và các câu hỏi liên quan đến mật ong!", "bot");
+  }
+
+  function sendMessage() {
+    const promptInput = document.getElementById("prompt");
+    const prompt = promptInput.value.trim();
+    if (!prompt) return;
+
+    appendMessage(prompt, "user");
+    promptInput.value = "";
+
+    // Kiểm tra câu hỏi đặc biệt
+    const lowerPrompt = prompt.toLowerCase();
+
+    const nameQuestions = [
+      "bạn tên gì", "tên bạn là gì", "mày tên gì", "cậu là ai", "bạn là ai"
+    ];
+    const productQuestions = [
+      "mật ong", "loại mật ong", "sản phẩm", "giá mật ong", "mật ong nguyên chất"
+    ];
+    const contactQuestions = [
+      "liên hệ", "số điện thoại", "địa chỉ", "email", "kết nối"
+    ];
+
+    if (nameQuestions.some(q => lowerPrompt.includes(q))) {
+      appendMessage("Mình tên là <b>chipi chipi</b>, nhân viên tư vấn tại trang trại mật ong. Rất vui được hỗ trợ bạn!", "bot");
+      return;
+    }
+
+    if (productQuestions.some(q => lowerPrompt.includes(q))) {
+      appendMessage("Chúng tôi cung cấp mật ong nguyên chất từ hoa nhãn, hoa cà phê và hoa vải. Bạn muốn biết thêm về loại nào?", "bot");
+      return;
+    }
+
+    if (contactQuestions.some(q => lowerPrompt.includes(q))) {
+      appendMessage("Bạn có thể liên hệ chúng tôi qua số điện thoại 0123 456 789 hoặc email honeyfarm@example.com.", "bot");
+      return;
+    }
+
+    appendMessage("Đang xử lý...", "bot");
+
+    fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: `Bạn là Chipi Chipi, một nhân viên tư vấn của trang trại ong mật. Hãy trả lời câu hỏi: "${prompt}"` }]
+        }]
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Xin lỗi, mình chưa hiểu câu hỏi của bạn.";
+      replaceLastBotMessage(text);
+    })
+    .catch(err => {
+      replaceLastBotMessage("Lỗi khi gửi yêu cầu: " + err.message);
+    });
+  }
+
+  function appendMessage(message, sender) {
+    const msg = document.createElement("div");
+    msg.className = `chat-message ${sender}`;
+    msg.innerHTML = `<p>${message}</p>`;
+    historyEl.appendChild(msg);
+    historyEl.scrollTop = historyEl.scrollHeight;
+  }
+
+  function replaceLastBotMessage(newText) {
+    const botMessages = historyEl.querySelectorAll(".chat-message.bot p");
+    const last = botMessages[botMessages.length - 1];
+    if (last) last.innerHTML = newText;
+  }
+</script>
+
+</body>
+</html>

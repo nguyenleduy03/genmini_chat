@@ -53,8 +53,6 @@ You can extend this project to use real product data from a database or JSON fil
 📜 License
 MIT License © 2025
 
-yaml
-Copy
-Edit
+
 
 ---
